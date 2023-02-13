@@ -1,0 +1,22 @@
+material = rna
+temperature = 37.0
+trials = 10
+sodium[M] = 1.0
+dangles = some
+allowmismatch = true
+
+# Sequence S1 contains a 6-nt 5'spacer and a 20-nt 5'EGS
+# Sequence S2 contains a 20-nt 3'EGS  
+structure S1 = U26
+structure S2 = U20
+# Once co-expressed, 5'EGS binds to 3'EGS, and 5'spacer remains unstructured  
+structure Complex = U6 D20 +
+
+domain a = N6
+domain b = N20
+
+S1.seq = a b
+S2.seq = b*
+Complex.seq = a b b*
+
+prevent = AAAA, CCCC, GGGG, UUUU, KKKKK, MMMMM, RRRRR, SSSSS, WWWWW, YYYYY
