@@ -1,0 +1,70 @@
+# Import Python NUPACK module
+from nupack import *
+
+# Define physical model
+my_model = Model(material='rna', celsius=37)
+
+# Set number of orthogonal systems
+systems = 10
+
+# Initialize working variables
+crosstalk_targets = {}
+crosstalk_excludes = []
+step_tubes = []
+
+#Loop over orthogonal systems
+for i in range(systems):
+
+# Define sequence domains
+da = Domain('N6', name=['da', i])
+db = Domain('N20', name=['db', i])
+
+# Define strands containing these domains
+sX = TargetStrand([da, db], name=['sX', i])
+sY = TargetStrand([~db], name=['sY', i])
+# ~db is the reverse conplement of db
+
+# Define the sequence diversity
+hard = [Diversity(word=4, types=2), Diversity(word=6, types=3)]
+
+# Define target complexes
+cX = TargetComplex([sX], 'U26', name=['cX', i])
+cY = TargetComplex([sY], 'U20', name=['cY', i])
+cXY = TargetComplex([sX, sY], 'U6D20+', name=['cXY', i])
+
+# Define 2 elementary step tubes for each orthogonal system
+step0_tube = TargetTube(on_targets={cX: 1e-08, cY: 1e-08},
+off_targets=SetSpec(max_size=2, exclude=[cXY]), name=['reactants',i])
+step1_tube = TargetTube(on_targets={cXY: 1e-08},
+off_targets=SetSpec(max_size=2), name=['products', i])
+step_tubes += [step0_tube, step1_tube]
+
+# Store contributions to global crosstalk tube
+crosstalk_targets.update({cX: 1e-08, cY: 1e-08})
+crosstalk_excludes += [cXY]
+
+# Define 1 global crosstalk tube
+crosstalk_tube = TargetTube(on_targets=crosstalk_targets,
+off_targets=SetSpec(max_size=2, exclude=crosstalk_excludes),name='crosstalk')
+
+# Define 1 global crosstalk tube
+crosstalk_tube = TargetTube(on_targets=crosstalk_targets,
+off_targets=SetSpec(max_size=2, exclude=crosstalk_excludes),
+
+# Define tube set
+my_tubes = step_tubes + [crosstalk_tube]
+
+# Define defect weight of N for global crosstalk tube
+# (maintain balance between elementary step tubes and global crosstalk tube as number of orthogonal systems increases)
+
+my_weights = Weights(my_tubes)
+my_weights[:,:,:,crosstalk_tube] *= systems
+
+# Define and run the test tube design job
+my_design = tube_design(tubes=my_tubes, defect_weights=my_weights, model=my_model, hard_constraints=hard)
+my_results = my_design.run(trials=1)[0]
+
+# Display the design results
+my_results
+
+

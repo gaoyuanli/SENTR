@@ -1,0 +1,31 @@
+material = rna
+temperature = 37.0
+trials = 10
+sodium[M] = 1.0
+dangles = some
+allowmismatch = true
+
+# Sequence S1 contains a 6-nt 5'spacer, a 20-nt 5'EGS and a 20-nt extended domain
+# Sequence S2 is trans-repressing RNA, which is reverse complementary to S1
+structure S1 = U46
+structure S2 = U46
+
+# Complex1 is formed by S1 and S2, in which 5'EGS is repressed
+structure Complex1 = D46
+# Complex2 is formed by S1 and 3'RNA 
+structure Complex2 = U6 D20 (U20 +) 
+
+# domain a is the original sequence of 5'EGS-2
+domain a = CACAUAACGACAAGACUACAGACAAG (5' EGS)
+# domain b is the extended domain
+domain b = N20
+# domain c is the original sequence of 3'EGS-2
+domain c = CUUGUCUGUAGUCUUGUCGU
+
+S1.seq = a b
+S2.seq = b* a*
+
+Complex1.seq = a b b* a*
+Complex2.seq = a b c
+
+prevent = AAAA, CCCC, GGGG, UUUU, KKKKK, MMMMM, RRRRR, SSSSS, WWWWW, YYYYY
